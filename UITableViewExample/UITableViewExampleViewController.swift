@@ -2,75 +2,71 @@
 //  UITableViewExampleViewController.swift
 //  UITableViewExample
 //
-//  Created by Minyoung Yoo on 2023/08/06.
+//  Created by Minyoung Yoo on 2024/03/28.
 //
 
 import UIKit
 
-class UITableViewExampleViewController: UIViewController, UITableViewDelegate {
+struct MockData: Identifiable {
+    let id: UUID = UUID()
+    let title: String
+    let description: String
+}
 
-    var tableView: UITableView!
-    var safeArea: UILayoutGuide!
-    let characters: [String] = ["Link","Zelda","Ganondorf","Impa"]
+class UITableViewExampleViewController: UIViewController {
+    
+    let tableView: UITableView = {
+        let tb: UITableView = UITableView()
+        tb.translatesAutoresizingMaskIntoConstraints = false
+        return tb
+    }()
+    
+    let mockData: [MockData] = [
+        MockData(title: "first data", description: "first description"),
+        MockData(title: "second data", description: "second description"),
+        MockData(title: "third data", description: "third description"),
+        MockData(title: "fourth data", description: "fourth description"),
+        MockData(title: "fifth data", description: "fifth description"),
+    ]
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = .systemBackground
-        safeArea = view.layoutMarginsGuide
-        setupTableView()
+        self.tableView.delegate = self
+        self.tableView.dataSource = self
+        self.tableView.register(UITableViewCell.self, forCellReuseIdentifier: "mockdata")
+        
+        setupUI()
     }
     
-    func setupTableView() -> Void{
-        tableView = UITableView()
+    func setupUI() {
+        self.view.backgroundColor = .systemBackground
+        self.view.addSubview(tableView)
         
-        view.addSubview(tableView)
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(MyTableViewCell.self, forCellReuseIdentifier: "cell")
-        tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            tableView.topAnchor.constraint(equalTo: safeArea.topAnchor),
-            tableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            tableView.widthAnchor.constraint(equalTo: view.widthAnchor)
+            tableView.widthAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.widthAnchor),
+            tableView.heightAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.heightAnchor),
+            tableView.centerXAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerXAnchor),
+            tableView.centerYAnchor.constraint(equalTo: self.view.safeAreaLayoutGuide.centerYAnchor),
         ])
     }
+    
+}
+
+extension UITableViewExampleViewController: UITableViewDelegate {
+    //delegate goes here...
 }
 
 extension UITableViewExampleViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return characters.count
+        return mockData.count
     }
-
+    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell: MyTableViewCell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! MyTableViewCell
-        cell.cellLabel.text = characters[indexPath.row]
+        let cell = tableView.dequeueReusableCell(withIdentifier: "mockdata", for: indexPath)
+        let data = mockData[indexPath.row]
+        var content = cell.defaultContentConfiguration()
+        content.text = data.title
+        cell.contentConfiguration = content
         return cell
-    }
-}
-
-class MyTableViewCell: UITableViewCell {
-    
-    var cellLabel: UILabel!
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupTableCell()
-    }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-    
-    func setupTableCell() -> Void{
-        cellLabel = UILabel()
-        cellLabel.translatesAutoresizingMaskIntoConstraints = false
-        contentView.addSubview(cellLabel)
-        
-        NSLayoutConstraint.activate([
-            cellLabel.topAnchor.constraint(equalTo: contentView.topAnchor),
-            cellLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            cellLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 20),
-            cellLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor)
-        ])
     }
 }
